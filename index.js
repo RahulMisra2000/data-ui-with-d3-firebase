@@ -9,6 +9,7 @@ const margin = {top: 20, right: 20, bottom: 100, left: 100};
 const graphWidth = 600 - margin.left - margin.right;
 const graphHeight = 600 - margin.top - margin.bottom;
 
+// Creating a <g element inside the <svg
 const graph = svg.append('g')
   .attr('width', graphWidth)
   .attr('height', graphHeight)
@@ -40,22 +41,26 @@ const yAxis = d3.axisLeft(y)
   .tickFormat(d => d + ' orders');
 
 // the update function
+// data will contain all the data records
 const update = (data) => {
 
-  // join the data to circs
+  // join the data to all the rects that are already in the DOM ***********************************************
   const rects = graph.selectAll('rect')
     .data(data);
 
   console.log(rects);
 
-  // remove unwanted rects
-  rects.exit().remove();
+  // remove unwanted rects ****  *********************************************************** ***** THINK OF THIS AS DELETING THE DOM NODES
+  // that means if there are more DOM nodes already in memory than the total number of data records then the extra number of DOM nodes are deleted
+  rects.exit().remove();   
 
   // update the domains
   y.domain([0, d3.max(data, d => d.orders)]);
   x.domain(data.map(item => item.name));
 
-  // add attrs to rects already in the DOM
+  // add attrs to nodes (rects in this example) already in the DOM   ************************ THINK OF THIS AS UPDATING THE DOM NODES
+  // the existing DOM nodes are updated with values from the data .... internally this is called in a loop ***************************************************
+  // all we need to do is assume that the parameter to the function points to one data record
   rects.attr('width', x.bandwidth)
     .attr("height", d => graphHeight - y(d.orders))
     .attr('fill', 'orange')
@@ -63,6 +68,8 @@ const update = (data) => {
     .attr('y', d => y(d.orders));
 
   // append the enter selection to the DOM
+  // This is called when the number of data records is MORE than the number of DOM nodes.*********** ***** THINK OF THIS AS CREATING THE DOM NODES ***************************************************
+  // Note : that is why we have to append an element so that D3 knows what kind of element (DOM node) to create 
   rects.enter()
     .append('rect')
       .attr('width', x.bandwidth)
